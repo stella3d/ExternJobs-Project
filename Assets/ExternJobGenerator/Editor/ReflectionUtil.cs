@@ -97,7 +97,8 @@ namespace Stella3d.ExternJobGenerator
     
     public static unsafe class ReflectionUtil
     {
-        public const string k_ReturnFieldLabel = "ReturnValue";
+        public const string ReturnFieldLabel = "Returned";
+        public const string ReturnValuePropertyLabel = "ReturnValue";
         
         static readonly HashSet<string> k_PreIncludedNamespaces = new HashSet<string>
         {
@@ -107,7 +108,7 @@ namespace Stella3d.ExternJobGenerator
         public static string ParameterToFieldName(string name, bool isReturn = false)
         {
             if (string.IsNullOrEmpty(name))
-                return isReturn ? k_ReturnFieldLabel : name;
+                return isReturn ? ReturnFieldLabel : name;
             
             // capitalize first letter to turn param names to field names
             return char.ToUpper(name[0]) + name.Substring(1);
@@ -137,12 +138,12 @@ namespace Stella3d.ExternJobGenerator
                 }
             }
 
-            var hasReturn = method.ReturnType != typeof(void);
+            var hasReturn = method.ReturnsValue();
             var returnsLength = hasReturn ? 1 : 0;
             
             jobData = new JobMethodData
             {
-                TypeName = JobWriter.GetTypeName(method),
+                TypeName = JobWriter.GetJobTypeName(method),
                 Fields = new IFieldDeclaration[parameters.Length + returnsLength],
                 NativeMethod = method
             };
@@ -210,10 +211,15 @@ namespace Stella3d.ExternJobGenerator
             return "";
         }
 
-        static string GetTypeName(this Type type)
+        internal static string GetTypeName(this Type type)
         {
-            return IsInPreIncludedNamespace(type) ? type.Name : type.IsGenericParameter ? type.Name : type.FullName;
+            if (type.IsPrimitive)
+                return JobWriter.GetPrimitiveName(type);
+
+            return IsInPreIncludedNamespace(type) ? type.Name : type.IsGenericParameter ? type.Name : type.FullName;;
         }
+        
+        public static bool ReturnsValue(this MethodInfo method)=> method.ReturnType != typeof(void);
 
         public static bool IsInPreIncludedNamespace(Type type)
         {

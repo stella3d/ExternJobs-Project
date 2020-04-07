@@ -13,23 +13,17 @@ namespace Stella3d.ExternJobGenerator.Tests
         {
             LogJobData(typeof(TestMethods), nameof(TestMethods.ScalePositions));
         }
-
-        [Test]
-        public void MaskThreshold()
-        {
-            LogJobData(typeof(TestMethods), nameof(TestMethods.MaskThreshold));
-        }
-        
-        [Test]
-        public void PositionMaskFilter()
-        {
-            LogJobData(typeof(TestMethods), nameof(TestMethods.PositionMaskFilter));
-        }
         
         [Test]
         public void SphereCullBatch()
         {
             LogJobData(typeof(TestMethods), nameof(TestMethods.SphereCullBatch));
+        }
+        
+        [Test]
+        public void SphereCullBatchFilter()
+        {
+            LogJobData(typeof(TestMethods), nameof(TestMethods.SphereCullBatchFilter));
         }
 
         [OneTimeTearDown] 

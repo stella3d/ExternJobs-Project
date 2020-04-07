@@ -2,11 +2,6 @@
 using UnityEngine;
 using Unity.Collections;
 
-
-
-
-
-
 namespace Stella3d.ExternJobGenerator
 {
     public static unsafe class TestMethods 
@@ -15,35 +10,35 @@ namespace Stella3d.ExternJobGenerator
         // written in a native language, such as ISPC
         
         [DllImport("ExampleNativeMethods")]
-        public static extern void MaskThreshold(
-            [ReadOnly] float* levels, 
-            [WriteOnly] int* mask, 
-            float threshold, 
-            int length);
-        
-        [DllImport("ExampleNativeMethods")]
         public static extern void SphereCullBatch(
-            [ReadOnly] Plane* frustumPlanes, 
-            [ReadOnly] Vector3* positions, 
-            [ReadOnly] float* radii, 
+            [ReadOnly] Plane* frustum, 
+            [ReadOnly] Sphere* spheres, 
             [WriteOnly] int* cullingMask, 
             int length);
-
+        
         /// <summary>
         /// Compact all elements of a masked vector array into a continuous array
         /// </summary>
-        /// <param name="mask">Inclusion mask - non-zero means include element</param>
-        /// <param name="filtered">The array to filter into</param>
-        /// <param name="length">The element count in the source array</param>
-        /// <returns>The element count in the filtered array</returns>
+        /// <param name="frustum">Camera frustum planes</param>
+        /// <param name="unculledIndices">The array to write active indices to</param>
+        /// <param name="length">The count of the source array</param>
+        /// <returns>The count of the unculled indices list</returns>
         [DllImport("ExampleNativeMethods")]
-        public static extern int PositionMaskFilter(
-            [ReadOnly] Vector3* positions, 
-            [ReadOnly] int* mask,
-            [WriteOnly] Vector3* filtered,
+        public static extern int SphereCullBatchFilter(
+            [ReadOnly] Plane* frustum, 
+            [ReadOnly] Sphere* spheres, 
+            [WriteOnly] int* unculledIndices,        
             int length);
 
-        public static void ScalePositions(Vector3* positions, float scaleFactor) { }
+        public static void ScalePositions(Vector3* positions, int length, float scaleFactor)
+        {
+            var ptr = positions;
+            for (int i = 0; i < length; i++)
+            {
+                *ptr = *ptr * scaleFactor;
+                ptr++;
+            }
+        }
     }
 }
 

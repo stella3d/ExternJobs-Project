@@ -9,6 +9,7 @@ namespace {NAMESPACE}
     public struct {JOB_TYPE_NAME} : IJob
     {
 {JOB_FIELDS}
+{RETURN_VALUE_GETTER}
         public unsafe void Execute()
         {
             {METHOD_INVOKE}

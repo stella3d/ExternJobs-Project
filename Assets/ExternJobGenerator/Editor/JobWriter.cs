@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Stella3d.ExternJobGenerator
 {
@@ -11,8 +12,10 @@ namespace Stella3d.ExternJobGenerator
     public static class JobWriter
     {
         const string k_TemplateFilePath = "Assets/ExternJobGenerator/Editor/Templates/IJobTemplate.txt";
-        const string k_FieldIndent = "        ";
+        const string k_MemberIndent = "        ";
 
+        static readonly string Newline = Environment.NewLine;
+        
         static readonly StringBuilder k_Builder = new StringBuilder();
         static readonly StringBuilder k_FileBuilder = new StringBuilder();
 
@@ -30,12 +33,13 @@ namespace Stella3d.ExternJobGenerator
             WriteTypeName(data);
             WriteFields(data.Fields);
             WriteMethodInvoke(data);
+            WriteReturnValueGetter(data);
 
             var content = k_FileBuilder.ToString();
             return content;
         }
 
-        public static string GetTypeName(MethodInfo method)
+        public static string GetJobTypeName(MethodInfo method)
         {
             var capitalizedName = char.ToUpperInvariant(method.Name[0]) + method.Name.Substring(1);
             return $"{capitalizedName}Job";
@@ -45,6 +49,28 @@ namespace Stella3d.ExternJobGenerator
         {
             const string toReplace = "{JOB_TYPE_NAME}";
             k_FileBuilder.Replace(toReplace, data.TypeName);
+        }
+        
+        static void WriteReturnValueGetter(JobMethodData data)
+        {
+            var method = data.NativeMethod;
+
+            string line;
+            if (!method.ReturnsValue())
+            {
+                line = "";
+            }
+            else
+            {
+                var typeStr = method.ReturnType.GetTypeName();
+                const string propertyStr = ReflectionUtil.ReturnValuePropertyLabel;
+                const string fieldStr = ReflectionUtil.ReturnFieldLabel;
+                
+                line = $"{k_MemberIndent}public {typeStr} {propertyStr} => {fieldStr}[0];{Newline}";
+            }
+            
+            string toReplace = $"{Environment.NewLine}{{RETURN_VALUE_GETTER}}";
+            k_FileBuilder.Replace(toReplace, line);
         }
  
         static void WriteNamespace(MethodInfo method)
@@ -77,7 +103,7 @@ namespace Stella3d.ExternJobGenerator
         
         static void WriteField(IFieldDeclaration field)
         {
-            k_Builder.AppendLine($"{k_FieldIndent}{field.Serialize()}");
+            k_Builder.AppendLine($"{k_MemberIndent}{field.Serialize()}");
         }
         
         static bool UseArrayExtensions { get; set; } = true;
@@ -121,8 +147,8 @@ namespace Stella3d.ExternJobGenerator
             }
 
             string returnStr = string.Empty;
-            if (data.NativeMethod.ReturnType != typeof(void))
-                returnStr = $"ReturnValue[0] = ";
+            if (data.NativeMethod.ReturnsValue())
+                returnStr = $"{ReflectionUtil.ReturnFieldLabel}[0] = ";
 
             var args = k_Builder.ToString();
             var line = $"{returnStr}{methodSymbol}({args});";
@@ -130,6 +156,9 @@ namespace Stella3d.ExternJobGenerator
             const string toReplace = "{METHOD_INVOKE}";
             k_FileBuilder.Replace(toReplace, line);
         }
+        
+        public const string ReturnFieldLabel = "ReturnValue";
+
 
         static string GetPointerCastPrefix(Type ptrType)
         {

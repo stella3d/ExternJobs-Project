@@ -10,11 +10,13 @@ namespace Stella3d.ExternJobGenerator
     {
         public readonly NativeArray<Vector3> Positions;
 
+        public readonly int Length;
+
         public readonly float ScaleFactor;
 
         public unsafe void Execute()
         {
-            TestMethods.ScalePositions(Positions.Ptr(), ScaleFactor);
+            TestMethods.ScalePositions(Positions.Ptr(), Length, ScaleFactor);
         }
     }
 }

@@ -6,19 +6,22 @@ using Unity.Collections.LowLevel.Unsafe;
 
 namespace Stella3d.ExternJobGenerator
 {
-    public struct SphereCullBatchJob : IJob
+    public struct SphereCullBatchFilterJob : IJob
     {
         [ReadOnly] public readonly NativeArray<Plane> Frustum;
 
         [ReadOnly] public readonly NativeArray<Sphere> Spheres;
 
-        [WriteOnly] public readonly NativeArray<int> CullingMask;
+        [WriteOnly] public readonly NativeArray<int> UnculledIndices;
 
         public readonly int Length;
 
+        [WriteOnly] public NativeArray<int> Returned;
+        public int ReturnValue => Returned[0];
+
         public unsafe void Execute()
         {
-            TestMethods.SphereCullBatch(Frustum.ReadPtr(), Spheres.ReadPtr(), CullingMask.Ptr(), Length);
+            Returned[0] = TestMethods.SphereCullBatchFilter(Frustum.ReadPtr(), Spheres.ReadPtr(), UnculledIndices.Ptr(), Length);
         }
     }
 }
