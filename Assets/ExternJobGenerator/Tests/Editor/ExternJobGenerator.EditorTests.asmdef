@@ -1,0 +1,18 @@
+{
+    "name": "ExternJobGenerator.EditorTests",
+    "references": [
+        "GUID:ef9f5c35e7377c54f837b86733ac5097",
+        "GUID:57d35afee37d3cc42acfa47793a6fa78"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
